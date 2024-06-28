@@ -1,0 +1,7 @@
+.block {
+  position: relative;
+  width: 60vw;
+  background-color: aquamarine;
+  min-height: 80vh;
+  padding-bottom: 20px;
+}

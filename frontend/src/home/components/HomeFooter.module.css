@@ -1,0 +1,15 @@
+.bg {
+  display: flex;
+  justify-content: center;
+}
+
+.btn {
+  width: 140px;
+  height: 40px;
+  background: #f79dfd;
+  margin-top: 20px;
+  border-radius: 17px;
+  border: 1;
+  color: #9005e6;
+  font: 500 16px "montserrat";
+}
