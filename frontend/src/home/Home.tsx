@@ -4,19 +4,18 @@ import HomeHeader from "./components/HomeHeader";
 import HomeFinds from "./components/HomeFinds";
 import instance from "../instance";
 import HomeFooter from "./components/HomeFooter";
-
-interface inVacancy {
-  _id: string;
-  name: string;
-  city: string;
-  employment: string;
-  salary_from: string;
-  salary_to: string;
-}
+import { inVacancy, IGroupOption } from "../interfaces";
 
 export default function Home() {
+  const [optionsVacancies, setOptionsVacancies] = useState<IGroupOption[]>();
+  const [cntVacancies, setCntVacancies] = useState<number>(0);
   const [vacancies, setVacancies] = useState<inVacancy[]>([]);
-  console.log(vacancies);
+  const [displayedVacancies, setDisplayedVacancies] = useState(
+    vacancies.slice(0, 6)
+  );
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const itemsPerPage = 6;
+
   useEffect(() => {
     const data = async () => {
       try {
@@ -24,15 +23,57 @@ export default function Home() {
           "/vacancies"
         );
         setVacancies(response.data);
-      } catch (err) {}
+        setDisplayedVacancies(response.data.slice(0, 6));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    const takeNames = async () => {
+      try {
+        const response = await instance.get("names");
+        const uniqueOptions = response.data.reduce((acc, option) => {
+          if (!acc.find((item) => item.value === option.value)) {
+            acc.push(option);
+          }
+          return acc;
+        }, []);
+        setOptionsVacancies(uniqueOptions);
+      } catch (err) {
+        console.log(err);
+      }
     };
     data();
+    takeNames();
+  }, []);
+  useEffect(() => {
+    setCurrentPage(0);
+    setDisplayedVacancies(vacancies.slice(0, 6));
   }, [vacancies]);
+  // console.log(vacancies);
   return (
     <div className={styles.block}>
-      <HomeHeader setVacancies={setVacancies} />
-      <HomeFinds vacancies={vacancies} />
-      <HomeFooter />
+      <HomeHeader
+        optionsVacancies={optionsVacancies}
+        setVacancies={setVacancies}
+      />
+      <HomeFinds
+        vacancies={vacancies}
+        setCurrentPage={setCurrentPage}
+        setDisplayedVacancies={setDisplayedVacancies}
+        currentPage={currentPage}
+        displayedVacancies={displayedVacancies}
+        currentPage={currentPage}
+      />
+      <HomeFooter
+        displayedVacancies={displayedVacancies}
+        setVacancies={setVacancies}
+        setCntVacancies={setCntVacancies}
+        cntVacancies={cntVacancies}
+        setCurrentPage={setCurrentPage}
+        vacancies={vacancies}
+        setDisplayedVacancies={setDisplayedVacancies}
+        currentPage={currentPage}
+      />
       <div className={styles.header}></div>
     </div>
   );

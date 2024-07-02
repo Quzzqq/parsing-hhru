@@ -17,45 +17,95 @@ export const getAllVacancies = async (req, res) => {
   }
 };
 
+export const getNextVacancies = async (req, res) => {
+  try {
+    const response = await VacanciesModel.find()
+      .skip(req.body.range)
+      .limit(req.body.range + 6);
+    if (!response) {
+      return res.status(404).json({ message: "Нет данных" });
+    }
+    console.log(response);
+    res.json(response);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Произошла ошибка" });
+  }
+};
+
 export const getVacanciesByName = async (req, res) => {
   try {
     const name = req.body.text;
+    console.log(name);
     const response = await axios.get(API_URL, {
       params: {
         text: name,
         per_page: 2,
       },
     });
-    const vacancies = response.data.items;
-    if (!vacancies) {
+    if (!response) {
       return res.status(404).json({ message: "Нет таких вакансий" });
     }
-    vacancies.forEach(async (vacancie) => {
-      //   const tempId = new mongoose.Types.ObjectId(inputId: Number(vacancie.id));
-      const test = await VacanciesModel.findById(Number(vacancie.id)).exec();
-      console.log(vacancie.id);
-      console.log(test);
-      if (test) {
-        return;
-      } else {
-        const doc = new VacanciesModel({
-          _id: vacancie.id,
-          name: vacancie?.name,
-          city: vacancie.area?.name,
-          employment: vacancie.employment?.name,
-          salary_from: vacancie.salary?.from,
-          salary_to: vacancie.salary?.to,
-        });
-        const vacancieOne = await doc.save();
+
+    const vacancies = response.data.items;
+    const updatePromises = vacancies.map(async (vacancie) => {
+      const id = vacancie.id;
+      try {
+        const dataResp = await VacanciesModel.findByIdAndUpdate(
+          id,
+          {
+            _id: vacancie.id,
+            name: vacancie?.name,
+            city: vacancie.area?.name,
+            employment: vacancie.employment?.name,
+            salary_from: vacancie.salary?.from,
+            salary_to: vacancie.salary?.to,
+          },
+          { returnDocument: "after" }
+        );
+        if (!dataResp) {
+          const doc = new VacanciesModel({
+            _id: vacancie.id,
+            name: vacancie?.name,
+            city: vacancie.area?.name,
+            employment: vacancie.employment?.name,
+            salary_from: vacancie.salary?.from,
+            salary_to: vacancie.salary?.to,
+          });
+          await doc.save();
+          return doc;
+        }
+        return dataResp;
+      } catch (err) {
+        console.log(err);
+        return null;
       }
     });
-    const data = await VacanciesModel.find({ name: name });
-    if (!data) {
+    const updatedVacancies = await Promise.all(updatePromises);
+    const validVacancies = updatedVacancies.filter(
+      (vacancie) => vacancie !== null
+    );
+
+    if (validVacancies.length === 0) {
       return res.status(404).json({ message: "Нет таких вакансий" });
     }
-    res.json(data);
+
+    res.json(validVacancies);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Произошла ошибка" });
+  }
+};
+
+export const getNames = async (req, res) => {
+  try {
+    const data = await VacanciesModel.find();
+    if (!data) {
+      res.status("404").json({ message: "Нет вакансий" });
+    }
+    const inf = data.map((info) => ({ value: info.name, label: info.name }));
+    res.json(inf);
+  } catch (err) {
+    console.log(err);
   }
 };

@@ -2,7 +2,9 @@ import express from "express";
 import cors from "cors";
 import {
   getAllVacancies,
+  getNextVacancies,
   getVacanciesByName,
+  getNames,
 } from "./controllers/VacanciesController.js";
 import mongoose from "mongoose";
 
@@ -22,8 +24,9 @@ app.use(express.json());
 app.use(cors());
 
 app.get("/vacancies", getAllVacancies);
-
-app.post("/vacancies", getVacanciesByName);
+app.get("/names", getNames);
+app.post("/vacancies", getNextVacancies);
+app.post("/vacancies/name", getVacanciesByName);
 
 app.listen(4444, (err) => {
   if (err) {

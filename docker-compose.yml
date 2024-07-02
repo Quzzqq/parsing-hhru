@@ -1,0 +1,21 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "4444:4444"
+    environment:
+      MONGO_URL: mongodb+srv://admin:wwwwww@cluster0.t54d0pj.mongodb.net/parsing_hhru?retryWrites=true&w=majority&appName=Cluster0
+    volumes:
+      - ./backend:/app

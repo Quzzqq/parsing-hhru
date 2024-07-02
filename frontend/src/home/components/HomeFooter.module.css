@@ -13,3 +13,14 @@
   color: #9005e6;
   font: 500 16px "montserrat";
 }
+
+.btn_off {
+  width: 140px;
+  height: 40px;
+  background: #bab9bb;
+  margin-top: 20px;
+  border-radius: 17px;
+  border: 1;
+  color: #9005e6;
+  font: 500 16px "montserrat";
+}

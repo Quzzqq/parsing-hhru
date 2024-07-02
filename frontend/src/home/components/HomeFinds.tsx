@@ -1,24 +1,34 @@
+import { useEffect, useState } from "react";
+import { HomeFindsProps } from "../../types";
 import styles from "./HomeFinds.module.css";
 
-type HomeFindsProps = {
-  vacancies: inVacancy[];
-};
-interface inVacancy {
-  _id: string;
-  name: string;
-  city: string;
-  employment: string;
-  salary_from: string;
-  salary_to: string;
-}
-
-const HomeFinds: React.FC<HomeFindsProps> = ({ vacancies }) => {
+const HomeFinds: React.FC<HomeFindsProps> = ({
+  vacancies,
+  setCurrentPage,
+  setDisplayedVacancies,
+  displayedVacancies,
+  currentPage,
+}) => {
+  const itemsPerPage = 6;
+  useEffect(() => {
+    const temp = currentPage * itemsPerPage;
+    setDisplayedVacancies((prev) => {
+      return [...prev, ...vacancies.slice(temp, temp + 6)];
+    });
+  }, [currentPage]);
+  useEffect(() => {
+    console.log(vacancies);
+  }, [vacancies]);
   return (
     <div className={styles.bg}>
-      {vacancies.map((vacancy) => {
+      {displayedVacancies.map((vacancy) => {
         return (
-          <div className={styles.block}>
-            <h4>{vacancy.name}</h4>
+          <div className={styles.block} key={vacancy._id}>
+            <h4>
+              <a href={`https://hh.ru/vacancy/${vacancy._id}`} target="_blank">
+                {vacancy.name}
+              </a>
+            </h4>
             <hr />
             <h5 className={styles.header}>Зарплата:</h5>
             <p className={styles.p}>

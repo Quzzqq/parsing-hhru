@@ -1,31 +1,25 @@
 import React, { useState } from "react";
 import styles from "./HomeHeader.module.css";
 import instance from "../../instance";
+import Select from "react-select";
+import { HomeHeaderProps } from "../../types";
+import { inVacancy } from "../../interfaces";
 
-type HomeHeaderProps = {
-  setVacancies: (vacancies: inVacancy[]) => void;
-};
-
-interface inVacancy {
-  _id: string;
-  name: string;
-  city: string;
-  employment: string;
-  salary_from: string;
-  salary_to: string;
-}
-
-const HomeHeader: React.FC<HomeHeaderProps> = ({ setVacancies }) => {
+const HomeHeader: React.FC<HomeHeaderProps> = ({
+  setVacancies,
+  optionsVacancies,
+}) => {
   const [value, setValue] = useState<string>();
-  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setValue(e.target.value);
+  function onChange(newValue) {
+    setValue(newValue);
   }
   async function findVacancies() {
+    const tempValue = value.value ? value.value : value;
     try {
       const response: { data: inVacancy[] } = await instance.post(
-        "/vacancies",
+        "/vacancies/name",
         {
-          text: value,
+          text: tempValue,
         }
       );
       setVacancies(response.data);
@@ -33,16 +27,25 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ setVacancies }) => {
       console.log(err);
     }
   }
+  // console.log(vacancies);
 
   return (
     <div className={styles.block}>
-      <input
-        type="text"
+      <Select
+        placeholder="Введите название вакансии"
+        name="dating_purpose"
+        options={optionsVacancies}
+        className={styles.inp}
         value={value}
         onChange={onChange}
-        className={styles.inp}
+        onInputChange={(newValue, actionMeta) => {
+          if (actionMeta.action === "input-change") {
+            setValue(newValue);
+          }
+        }}
+        maxMenuHeight={130}
       />
-      <button onClick={findVacancies}>ok</button>
+      <button onClick={findVacancies}>Поиск</button>
     </div>
   );
 };

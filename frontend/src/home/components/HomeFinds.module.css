@@ -14,7 +14,17 @@
   border-radius: 15px;
 }
 
+a {
+  text-decoration: none;
+  min-height: 30px;
+  text-align: center;
+  color: black;
+  font: 500 13px "montserrat";
+  padding: 5px 2px 0px 5px;
+}
 h4 {
+  padding-left: 25px;
+  text-decoration: none;
   min-height: 30px;
   text-align: center;
   font: 500 13px "montserrat";
