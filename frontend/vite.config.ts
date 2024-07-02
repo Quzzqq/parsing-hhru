@@ -6,6 +6,5 @@ export default defineConfig({
   plugins: [react()],
   esbuild: {
     target: "esnext",
-    platform: "windows",
   },
 });
