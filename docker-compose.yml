@@ -1,3 +1,4 @@
+version: "3.9"
 services:
   frontend:
     build:
@@ -19,3 +20,6 @@ services:
       MONGO_URL: mongodb+srv://admin:wwwwww@cluster0.t54d0pj.mongodb.net/parsing_hhru?retryWrites=true&w=majority&appName=Cluster0
     volumes:
       - ./backend:/app
+volumes:
+  pgdata: {}
+  node_modules: {}

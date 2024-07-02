@@ -1,13 +1,11 @@
-FROM node:20-alpine
+FROM node:21-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+RUN yarn
 
 COPY . .
 
-CMD ["npm", "run", "dev"] 
-
-EXPOSE 5173
+CMD ["yarn", "dev"] 
