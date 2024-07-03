@@ -15,7 +15,7 @@ export default function Home() {
   );
   const [currentPage, setCurrentPage] = useState<number>(0);
   const itemsPerPage = 6;
-
+  // console.log(vacancies);
   useEffect(() => {
     const data = async () => {
       try {

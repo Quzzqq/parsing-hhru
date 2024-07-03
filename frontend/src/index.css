@@ -1,5 +1,6 @@
 body {
-  background-color: #837c7c;
+  background: linear-gradient(#dd5e89, #f7bb97);
   display: flex;
   justify-content: center;
+  background-attachment: fixed;
 }

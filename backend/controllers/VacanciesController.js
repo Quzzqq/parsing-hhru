@@ -35,24 +35,26 @@ export const getNextVacancies = async (req, res) => {
 
 export const getVacanciesByName = async (req, res) => {
   try {
-    const name = req.body.text;
-    console.log(name);
+    const salaryFindFrom = req.body.salary_from;
+    const salaryFindTo = req.body.salary_to;
+    const nameVacancy = req.body.text;
+
     const response = await axios.get(API_URL, {
       params: {
-        text: name,
-        per_page: 2,
+        text: nameVacancy,
+        // per_page: 2,
       },
     });
+
     if (!response) {
       return res.status(404).json({ message: "Нет таких вакансий" });
     }
 
     const vacancies = response.data.items;
     const updatePromises = vacancies.map(async (vacancie) => {
-      const id = vacancie.id;
       try {
-        const dataResp = await VacanciesModel.findByIdAndUpdate(
-          id,
+        const updatedVacancie = await VacanciesModel.findOneAndUpdate(
+          { _id: vacancie.id },
           {
             _id: vacancie.id,
             name: vacancie?.name,
@@ -61,36 +63,43 @@ export const getVacanciesByName = async (req, res) => {
             salary_from: vacancie.salary?.from,
             salary_to: vacancie.salary?.to,
           },
-          { returnDocument: "after" }
+          { upsert: true, new: true }
         );
-        if (!dataResp) {
-          const doc = new VacanciesModel({
-            _id: vacancie.id,
-            name: vacancie?.name,
-            city: vacancie.area?.name,
-            employment: vacancie.employment?.name,
-            salary_from: vacancie.salary?.from,
-            salary_to: vacancie.salary?.to,
-          });
-          await doc.save();
-          return doc;
-        }
-        return dataResp;
+
+        return updatedVacancie;
       } catch (err) {
         console.log(err);
         return null;
       }
     });
-    const updatedVacancies = await Promise.all(updatePromises);
-    const validVacancies = updatedVacancies.filter(
-      (vacancie) => vacancie !== null
-    );
 
-    if (validVacancies.length === 0) {
-      return res.status(404).json({ message: "Нет таких вакансий" });
+    await Promise.all(updatePromises);
+
+    let sendVacancies;
+    if (salaryFindFrom === 0 && salaryFindTo === 500000) {
+      sendVacancies = await VacanciesModel.find(
+        nameVacancy ? { name: nameVacancy } : {}
+      );
+    } else {
+      sendVacancies = await VacanciesModel.find(
+        nameVacancy
+          ? {
+              name: nameVacancy,
+              salary_from: { $gte: salaryFindFrom },
+              salary_to: { $lte: salaryFindTo },
+            }
+          : {
+              salary_from: { $gte: salaryFindFrom },
+              salary_to: { $lte: salaryFindTo },
+            }
+      );
     }
 
-    res.json(validVacancies);
+    if (sendVacancies.length !== 0) {
+      res.json(sendVacancies);
+    } else {
+      res.json({ name: "нет" });
+    }
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Произошла ошибка" });
