@@ -3,8 +3,8 @@
   background: linear-gradient(#9796f0, #fbc7d4);
   justify-content: flex-end;
   min-height: 50px;
-  align-items: center;
   padding-right: 30px;
+  align-items: center;
   padding-bottom: 15px;
   /* padding-right: 25px; */
 }
@@ -64,4 +64,23 @@
   width: 60px;
   height: 25px;
   margin-top: 15px;
+}
+
+.block_employ {
+  font: 700 13px Montserrat;
+  position: absolute;
+  left: 30px;
+  color: #000;
+  width: 200px;
+}
+.block_employ p {
+  position: absolute;
+  top: -30px;
+  left: 45px;
+}
+
+.employ {
+  position: absolute;
+  width: 200px;
+  top: 1px;
 }

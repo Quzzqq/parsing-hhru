@@ -17,32 +17,15 @@ export const getAllVacancies = async (req, res) => {
   }
 };
 
-export const getNextVacancies = async (req, res) => {
-  try {
-    const response = await VacanciesModel.find()
-      .skip(req.body.range)
-      .limit(req.body.range + 6);
-    if (!response) {
-      return res.status(404).json({ message: "Нет данных" });
-    }
-    console.log(response);
-    res.json(response);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Произошла ошибка" });
-  }
-};
-
 export const getVacanciesByName = async (req, res) => {
   try {
     const salaryFindFrom = req.body.salary_from;
     const salaryFindTo = req.body.salary_to;
     const nameVacancy = req.body.text;
-
+    const employ = req.body.employ;
     const response = await axios.get(API_URL, {
       params: {
         text: nameVacancy,
-        // per_page: 2,
       },
     });
 
@@ -78,7 +61,12 @@ export const getVacanciesByName = async (req, res) => {
     let sendVacancies;
     if (salaryFindFrom === 0 && salaryFindTo === 500000) {
       sendVacancies = await VacanciesModel.find(
-        nameVacancy ? { name: nameVacancy } : {}
+        nameVacancy
+          ? {
+              name: nameVacancy,
+              ...(employ === "any" ? {} : { employment: employ }),
+            }
+          : {}
       );
     } else {
       sendVacancies = await VacanciesModel.find(
@@ -87,10 +75,12 @@ export const getVacanciesByName = async (req, res) => {
               name: nameVacancy,
               salary_from: { $gte: salaryFindFrom },
               salary_to: { $lte: salaryFindTo },
+              ...(employ === "any" ? {} : { employment: employ }),
             }
           : {
               salary_from: { $gte: salaryFindFrom },
               salary_to: { $lte: salaryFindTo },
+              ...(employ === "any" ? {} : { employment: employ }),
             }
       );
     }
