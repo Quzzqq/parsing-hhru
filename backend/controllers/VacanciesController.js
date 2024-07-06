@@ -22,7 +22,6 @@ export const getVacanciesByName = async (req, res) => {
     const salaryFindFrom = req.body.salary_from;
     const salaryFindTo = req.body.salary_to;
     const nameVacancy = req.body.text;
-    const employ = req.body.employ;
     const response = await axios.get(API_URL, {
       params: {
         text: nameVacancy,
@@ -64,7 +63,6 @@ export const getVacanciesByName = async (req, res) => {
         nameVacancy
           ? {
               name: nameVacancy,
-              ...(employ === "any" ? {} : { employment: employ }),
             }
           : {}
       );
@@ -75,12 +73,10 @@ export const getVacanciesByName = async (req, res) => {
               name: nameVacancy,
               salary_from: { $gte: salaryFindFrom },
               salary_to: { $lte: salaryFindTo },
-              ...(employ === "any" ? {} : { employment: employ }),
             }
           : {
               salary_from: { $gte: salaryFindFrom },
               salary_to: { $lte: salaryFindTo },
-              ...(employ === "any" ? {} : { employment: employ }),
             }
       );
     }

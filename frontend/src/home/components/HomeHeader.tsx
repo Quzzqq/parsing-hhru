@@ -20,7 +20,6 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
     from: 0,
     to: 500000,
   });
-  const [employ, setEmploy] = useState("any");
   function onChange(newValue) {
     setValue(newValue);
   }
@@ -34,7 +33,6 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
           salary_from: salary.from,
           salary_to: salary.to,
           text: tempValue,
-          employ: employ,
         }
       );
       if (response.data.name === "нет") {
@@ -47,24 +45,6 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
 
   return (
     <div className={styles.block}>
-      <div className={styles.block_employ}>
-        <p>Тип занятости</p>
-        <select
-          name="employ"
-          className={styles.employ}
-          onChange={(e) => setEmploy(e.target.value)}
-        >
-          <option value="Полная занятость">Полная занятость</option>
-          <option value="Частичная занятость">Частичная занятость</option>
-          <option value="Проектная работа/разовое задание">
-            Проектная работа/разовое задание
-          </option>
-          <option value="Волонтерство">Волонтерство</option>
-          <option value="Стажировка">Стажировка</option>
-          <option value="any">Не указан</option>
-        </select>
-      </div>
-
       <div className={styles.slider_block}>
         <div className={styles.slider_main}>
           <p>Зарплата</p>
