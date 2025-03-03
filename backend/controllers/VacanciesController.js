@@ -1,106 +1,50 @@
-import axios from "axios";
 import VacanciesModel from "../models/vacancies.js";
-import mongoose from "mongoose";
-
-const API_URL = "https://api.hh.ru/vacancies";
+import {
+  fetchVacanciesFromAPI,
+  updateVacancies,
+  getFilteredVacancies,
+} from "../services/VacanciesService.js";
 
 export const getAllVacancies = async (req, res) => {
   try {
-    const response = await VacanciesModel.find();
-    if (!response) {
-      return res.status(404).json({ message: "Нет данных" });
-    }
-    res.json(response);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Произошла ошибка" });
+    const vacancies = await VacanciesModel.find();
+    res.json(vacancies.length ? vacancies : { message: "Нет данных" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
 };
 
 export const getVacanciesByName = async (req, res) => {
   try {
-    const salaryFindFrom = req.body.salary_from;
-    const salaryFindTo = req.body.salary_to;
-    const nameVacancy = req.body.text;
-    const response = await axios.get(API_URL, {
-      params: {
-        text: nameVacancy,
-      },
-    });
+    const {
+      text: nameVacancy,
+      salary_from: salaryFindFrom,
+      salary_to: salaryFindTo,
+    } = req.body;
 
-    if (!response) {
-      return res.status(404).json({ message: "Нет таких вакансий" });
-    }
+    const vacancies = await fetchVacanciesFromAPI(nameVacancy);
+    await updateVacancies(vacancies);
 
-    const vacancies = response.data.items;
-    const updatePromises = vacancies.map(async (vacancie) => {
-      try {
-        const updatedVacancie = await VacanciesModel.findOneAndUpdate(
-          { _id: vacancie.id },
-          {
-            _id: vacancie.id,
-            name: vacancie?.name,
-            city: vacancie.area?.name,
-            employment: vacancie.employment?.name,
-            salary_from: vacancie.salary?.from,
-            salary_to: vacancie.salary?.to,
-          },
-          { upsert: true, new: true }
-        );
-
-        return updatedVacancie;
-      } catch (err) {
-        console.log(err);
-        return null;
-      }
-    });
-
-    await Promise.all(updatePromises);
-
-    let sendVacancies;
-    if (salaryFindFrom === 0 && salaryFindTo === 500000) {
-      sendVacancies = await VacanciesModel.find(
-        nameVacancy
-          ? {
-              name: nameVacancy,
-            }
-          : {}
-      );
-    } else {
-      sendVacancies = await VacanciesModel.find(
-        nameVacancy
-          ? {
-              name: nameVacancy,
-              salary_from: { $gte: salaryFindFrom },
-              salary_to: { $lte: salaryFindTo },
-            }
-          : {
-              salary_from: { $gte: salaryFindFrom },
-              salary_to: { $lte: salaryFindTo },
-            }
-      );
-    }
-
-    if (sendVacancies.length !== 0) {
-      res.json(sendVacancies);
-    } else {
-      res.json({ name: "нет" });
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Произошла ошибка" });
+    const filteredVacancies = await getFilteredVacancies(
+      nameVacancy,
+      salaryFindFrom,
+      salaryFindTo
+    );
+    res.json(filteredVacancies.length ? filteredVacancies : { message: "нет" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
 };
 
 export const getNames = async (req, res) => {
   try {
-    const data = await VacanciesModel.find();
-    if (!data) {
-      res.status("404").json({ message: "Нет вакансий" });
-    }
-    const inf = data.map((info) => ({ value: info.name, label: info.name }));
-    res.json(inf);
-  } catch (err) {
-    console.log(err);
+    const vacancies = await VacanciesModel.find({}, "name");
+    const names = vacancies.map(({ name }) => ({ value: name, label: name }));
+    res.json(names);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
 };
